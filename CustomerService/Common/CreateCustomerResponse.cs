@@ -8,7 +8,7 @@ namespace CustomerService.Common
 {
     public class CreateCustomerResponse
     {
-        private long customerId;
+        public long customerId { get; set; }
 
         public CreateCustomerResponse()
         {

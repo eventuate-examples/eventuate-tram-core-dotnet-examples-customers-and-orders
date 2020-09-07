@@ -6,11 +6,10 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["CustomerService.csproj", "./"]
-COPY NuGet.Config /
-RUN dotnet restore "CustomerService.csproj" -p:RestoreUseSkipNonexistentTargets=false -nowarn:msb3202,nu1503
+COPY ["CustomerService.csproj", ""]
+RUN dotnet restore "./CustomerService.csproj"
 COPY . .
-WORKDIR "/src/"
+WORKDIR "/src/."
 RUN dotnet build "CustomerService.csproj" -c Release -o /app/build
 
 FROM build AS publish

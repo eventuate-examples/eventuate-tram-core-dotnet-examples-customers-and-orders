@@ -1,0 +1,95 @@
+version: '3.4'
+services:
+  wait-for-db:
+    # The mssql-tools image seems to only have a "latest" tag, so specifying the digest here to ensure a specific version is used
+    image: mcr.microsoft.com/mssql-tools@sha256:62556500522072535cb3df2bb5965333dded9be47000473e9e0f84118e248642
+    depends_on:
+    - db
+    environment:
+      TRAM_DB_SERVER: "db"
+      TRAM_SA_PASSWORD: "App@Passw0rd"
+      TRAM_DB: "TramDb"
+      TRAM_SCHEMA: "eventuate"
+      TRAM_SCHEMA2: "schema1"
+    volumes:
+    - ./TestDatabase:/scripts
+    working_dir: /scripts
+    entrypoint: [ "bash", "./wait-for-db.sh" ]
+    
+  dbsetup:
+   # The mssql-tools image seems to only have a "latest" tag, so specifying the digest here to ensure a specific version is used
+    image: mcr.microsoft.com/mssql-tools@sha256:62556500522072535cb3df2bb5965333dded9be47000473e9e0f84118e248642
+    depends_on:
+    - db
+    environment:
+      TRAM_DB_SERVER: "db"
+      TRAM_SA_PASSWORD: "App@Passw0rd"
+      TRAM_DB: "TramDb"
+      TRAM_SCHEMA: "eventuate"
+      TRAM_SCHEMA2: "schema1"
+    volumes:
+    - ./TestDatabase:/scripts
+    working_dir: /scripts
+    entrypoint: [ "bash", "./entrypoint.sh" ]
+
+  customerservice:
+    image: customerservice
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    build:
+      context: ./customerservice/
+      dockerfile: Dockerfile
+    ports: 
+      - "8081:80"
+    container_name: customerservice
+    depends_on:
+      - db
+
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+        SA_PASSWORD: "App@Passw0rd"
+        ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+      
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      
+  kafka:
+    image: confluentinc/cp-kafka:5.5.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+     
+  cdcservice:
+    image: eventuateio/eventuate-cdc-service:0.9.0.RELEASE
+    ports:
+      - 8099:8080
+    depends_on:
+    - kafka
+    - db
+    environment:
+      EVENTUATELOCAL_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EVENTUATELOCAL_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
+
+      EVENTUATE_CDC_READER_READER1_TYPE: polling
+      EVENTUATE_CDC_READER_READER1_DATASOURCEURL: jdbc:sqlserver://db;databaseName=TramDb
+      EVENTUATE_CDC_READER_READER1_DATASOURCEUSERNAME: sa
+      EVENTUATE_CDC_READER_READER1_DATASOURCEPASSWORD: App@Passw0rd
+      EVENTUATE_CDC_READER_READER1_DATASOURCEDRIVERCLASSNAME: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      EVENTUATE_CDC_READER_READER1_LEADERSHIPLOCKPATH: /eventuatelocal/cdc/leader/1
+
+      EVENTUATE_CDC_PIPELINE_PIPELINE1_TYPE: eventuate-tram
+      EVENTUATE_CDC_PIPELINE_PIPELINE1_READER: READER1
+      EVENTUATE_CDC_PIPELINE_PIPELINE1_EVENTUATEDATABASESCHEMA: eventuate
+   

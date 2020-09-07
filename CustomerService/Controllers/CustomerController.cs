@@ -24,14 +24,13 @@ namespace CustomerService.Controllers
             customerRepository = _customerRepository;
             domainEventPublisher = _domainEventPublisher;
         }
-
         [HttpPost]
         public IActionResult CreateCustomer([FromBody] CreateCustomerRequest request)
         {
             CustomerDataService customerService = new CustomerDataService(customerRepository, domainEventPublisher);
             Customer customer = customerService.CreateCustomer(request.Name, request.CreditLimit);
-            var response = new CreateCustomerResponse(customer.id);
-            return Ok(response);
+            CreateCustomerResponse createCustomerResponse = new CreateCustomerResponse(customer.id);
+            return Ok(createCustomerResponse);
         }
     }
 }

@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerService.Classes
+namespace ServiceCommon.Classes
 {
     public class CustomerCreatedEvent : ICustomerEvent
     {
-        private String name;
-        private decimal creditLimit;
+        public String name { get; set; }
+        private Money creditLimit { get; set; }
         public CustomerCreatedEvent()
         {
         }
 
-        public CustomerCreatedEvent(String name, decimal creditLimit)
+        public CustomerCreatedEvent(String _name, Money _creditLimit)
         {
-            this.name = name;
-            this.creditLimit = creditLimit;
+            name = name;
+            creditLimit = creditLimit;
         }
 
         public String GetName()
@@ -29,14 +29,14 @@ namespace CustomerService.Classes
             this.name = name;
         }
 
-        public decimal GetCreditLimit()
+        public Money GetCreditLimit()
         {
             return creditLimit;
         }
 
-        public void SetCreditLimit(decimal creditLimit)
+        public void SetCreditLimit(Money _creditLimit)
         {
-            this.creditLimit = creditLimit;
+            creditLimit = _creditLimit;
         }
     }
 }

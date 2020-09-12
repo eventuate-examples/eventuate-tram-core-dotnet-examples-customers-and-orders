@@ -1,14 +1,14 @@
-﻿using CustomerService.Classes;
+﻿using ServiceCommon.Classes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerService.Common
+namespace ServiceCommon.Common
 {
     public class CreateCustomerRequest
     {
         public string Name { get; set; }
-        public decimal CreditLimit { get; set; }
+        public Money CreditLimit { get; set; }
     }
 }

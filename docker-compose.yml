@@ -8,7 +8,7 @@ services:
     environment:
       TRAM_DB_SERVER: "db"
       TRAM_SA_PASSWORD: "App@Passw0rd"
-      TRAM_DB: "TramDb"
+      TRAM_DB: "eventuate"
       TRAM_SCHEMA: "eventuate"
       TRAM_SCHEMA2: "schema1"
     volumes:
@@ -24,7 +24,7 @@ services:
     environment:
       TRAM_DB_SERVER: "db"
       TRAM_SA_PASSWORD: "App@Passw0rd"
-      TRAM_DB: "TramDb"
+      TRAM_DB: "eventuate"
       TRAM_SCHEMA: "eventuate"
       TRAM_SCHEMA2: "schema1"
     volumes:
@@ -32,18 +32,18 @@ services:
     working_dir: /scripts
     entrypoint: [ "bash", "./entrypoint.sh" ]
 
-  customerservice:
-    image: customerservice
+  customer-service:
+    image: customer-service
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:80
     build:
-      context: ./customerservice/
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: DockerfileCustomer
     ports: 
       - "8081:80"
-    container_name: customerservice
+    container_name: customer-service
     depends_on:
-      - db
+     - db
 
   db:
     image: "mcr.microsoft.com/mssql/server"
@@ -51,7 +51,7 @@ services:
         SA_PASSWORD: "App@Passw0rd"
         ACCEPT_EULA: "Y"
     ports:
-      - "1433:1433"
+      - "1433:1433"      
       
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0
@@ -71,7 +71,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
      
-  cdcservice:
+  cdc-service:
     image: eventuateio/eventuate-cdc-service:0.9.0.RELEASE
     ports:
       - 8099:8080
@@ -83,7 +83,7 @@ services:
       EVENTUATELOCAL_ZOOKEEPER_CONNECTION_STRING: zookeeper:2181
 
       EVENTUATE_CDC_READER_READER1_TYPE: polling
-      EVENTUATE_CDC_READER_READER1_DATASOURCEURL: jdbc:sqlserver://db;databaseName=TramDb
+      EVENTUATE_CDC_READER_READER1_DATASOURCEURL: jdbc:sqlserver://db;databaseName=eventuate
       EVENTUATE_CDC_READER_READER1_DATASOURCEUSERNAME: sa
       EVENTUATE_CDC_READER_READER1_DATASOURCEPASSWORD: App@Passw0rd
       EVENTUATE_CDC_READER_READER1_DATASOURCEDRIVERCLASSNAME: com.microsoft.sqlserver.jdbc.SQLServerDriver

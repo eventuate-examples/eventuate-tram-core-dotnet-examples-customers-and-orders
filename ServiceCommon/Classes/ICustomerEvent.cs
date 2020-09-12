@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerService.Classes
+namespace ServiceCommon.Classes
 {
     public interface ICustomerEvent : IDomainEvent
     {

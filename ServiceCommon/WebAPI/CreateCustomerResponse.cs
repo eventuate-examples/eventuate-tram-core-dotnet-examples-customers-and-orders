@@ -1,10 +1,9 @@
-﻿using CustomerService.Classes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CustomerService.Common
+namespace ServiceCommon.Common
 {
     public class CreateCustomerResponse
     {

@@ -48,10 +48,20 @@ fi
 
 docker-compose up -d zookeeper
 docker-compose up -d kafka
-docker-compose up -d cdcservice
+docker-compose up -d cdc-service
 
 # Wait for docker containers to start up
 ./wait-for-services.sh
 
 # Run Service
-docker-compose up -d customerservice
+docker-compose up -d customer-service
+
+#Run Tests
+dotnet build EndToEndTests/EndToEndTests.csproj
+dotnet test EndToEndTests/EndToEndTests.csproj 
+
+# Tear down test environment
+
+if [ -z "$KEEP_RUNNING" ] ; then
+  docker-compose down -v --remove-orphans
+fi

@@ -1,0 +1,22 @@
+version: '3.4'
+services:
+  customerservice:
+    image: customerservice
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "8081:80"
+    container_name: customerservice
+    depends_on:
+      - db
+
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+        SA_PASSWORD: "App@Passw0rd"
+        ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"

@@ -29,7 +29,7 @@ namespace CustomerService.Controllers
         {
             CustomerDataService customerService = new CustomerDataService(customerRepository, domainEventPublisher);
             Customer customer = customerService.CreateCustomer(request.Name, request.CreditLimit);
-            CreateCustomerResponse createCustomerResponse = new CreateCustomerResponse(customer.id);
+            CreateCustomerResponse createCustomerResponse = new CreateCustomerResponse(customer.Id);
             return Ok(createCustomerResponse);
         }
     }

@@ -7,36 +7,36 @@ namespace ServiceCommon.Classes
 {
     public class CustomerCreatedEvent : ICustomerEvent
     {
-        public String name { get; set; }
-        private Money creditLimit { get; set; }
+        public String Name { get; set; }
+        private Money CreditLimit { get; set; }
         public CustomerCreatedEvent()
         {
         }
 
-        public CustomerCreatedEvent(String _name, Money _creditLimit)
+        public CustomerCreatedEvent(String name, Money creditLimit)
         {
-            name = name;
-            creditLimit = creditLimit;
+            Name = name;
+            CreditLimit = creditLimit;
         }
 
         public String GetName()
         {
-            return name;
+            return Name;
         }
 
         public void SetName(String name)
         {
-            this.name = name;
+            Name = name;
         }
 
         public Money GetCreditLimit()
         {
-            return creditLimit;
+            return CreditLimit;
         }
 
-        public void SetCreditLimit(Money _creditLimit)
+        public void SetCreditLimit(Money creditLimit)
         {
-            creditLimit = _creditLimit;
+            CreditLimit = creditLimit;
         }
     }
 }

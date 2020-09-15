@@ -9,25 +9,25 @@ namespace CustomerService.Classes
 {
     public class ResultsWithEvents
     {
-        public Customer customer;
-        public List<IDomainEvent> events;
+        public Customer Customer { get; set; }
+        public List<IDomainEvent> Events { get; set; }
 
         public ResultsWithEvents()
         {
         }
 
-        public ResultsWithEvents(Customer _customer, List<IDomainEvent> _events)
+        public ResultsWithEvents(Customer customer, List<IDomainEvent> events)
         {
-            customer = _customer;
-            events = _events;
+            Customer = customer;
+            Events = events;
         }
 
-        public ResultsWithEvents(Customer _customer, IDomainEvent _event)
+        public ResultsWithEvents(Customer customer, IDomainEvent domainEvent)
         {
-            customer = _customer;
+            Customer = customer;
             List<IDomainEvent> eventList = new List<IDomainEvent>();
-            eventList.Add(_event);
-            events = eventList;
+            eventList.Add(domainEvent);
+            Events = eventList;
         }
     }
 }

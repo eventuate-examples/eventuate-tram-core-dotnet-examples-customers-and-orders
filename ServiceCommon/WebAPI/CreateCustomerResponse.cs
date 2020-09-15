@@ -7,15 +7,15 @@ namespace ServiceCommon.Common
 {
     public class CreateCustomerResponse
     {
-        public long customerId { get; set; }
+        public long CustomerId { get; set; }
 
         public CreateCustomerResponse()
         {
         }
 
-        public CreateCustomerResponse(long _customerId)
+        public CreateCustomerResponse(long customerId)
         {
-            customerId = _customerId;
+            CustomerId = customerId;
         }
     }
 }

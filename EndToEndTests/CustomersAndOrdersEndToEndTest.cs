@@ -34,7 +34,7 @@ namespace EndToEndTests
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
                 string jsonString = await response.Content.ReadAsStringAsync();
                 var customerResponse = JsonSerializer.Deserialize<CreateCustomerResponse>(jsonString);
-                Assert.IsNotNull(customerResponse.customerId);
+                Assert.IsNotNull(customerResponse.CustomerId);
             }
         }
     }

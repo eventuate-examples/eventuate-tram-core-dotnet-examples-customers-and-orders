@@ -8,7 +8,7 @@ namespace ServiceCommon.Classes
     public class Money
     {
         public static Money ZERO = new Money(0);
-        public decimal amount { get; set; }
+        public decimal Amount { get; set; }
 
         public Money()
         {
@@ -16,40 +16,29 @@ namespace ServiceCommon.Classes
 
         public Money(int i)
         {
-            amount = Convert.ToDecimal(i);
+            Amount = Convert.ToDecimal(i);
         }
         public Money(String s)
         {
-            amount = Convert.ToDecimal(s);
+            Amount = Convert.ToDecimal(s);
         }
 
-        public Money(decimal _amount)
+        public Money(decimal amount)
         {
-            amount = _amount;
+            Amount = amount;
+        }
+        public bool IsGreaterThanOrEqual(Money other)
+        {
+            return Amount >= other.Amount;
         }
 
-        public decimal getAmount()
+        public Money Add(Money other)
         {
-            return amount;
+            return new Money(Amount + (other.Amount));
         }
-
-        public void setAmount(decimal _amount)
+        public Money Subtract(Money other)
         {
-            this.amount = _amount;
-        }
-
-        public bool isGreaterThanOrEqual(Money other)
-        {
-            return amount >= other.amount;
-        }
-
-        public Money add(Money other)
-        {
-            return new Money(amount + (other.amount));
-        }
-        public Money subtract(Money other)
-        {
-            return new Money(amount - (other.amount));
+            return new Money(Amount - (other.Amount));
         }
     }
 }

@@ -12,30 +12,9 @@ namespace ServiceCommon.Classes
         public CustomerCreatedEvent()
         {
         }
-
         public CustomerCreatedEvent(String name, Money creditLimit)
         {
             Name = name;
-            CreditLimit = creditLimit;
-        }
-
-        public String GetName()
-        {
-            return Name;
-        }
-
-        public void SetName(String name)
-        {
-            Name = name;
-        }
-
-        public Money GetCreditLimit()
-        {
-            return CreditLimit;
-        }
-
-        public void SetCreditLimit(Money creditLimit)
-        {
             CreditLimit = creditLimit;
         }
     }

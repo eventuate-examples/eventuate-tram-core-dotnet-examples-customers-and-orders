@@ -28,7 +28,7 @@ namespace CustomerService.Service
             {
                 ResultsWithEvents customerWithEvents = Create(name, creditLimit);
                 customer = customerRepository.InsertCustomer(customerWithEvents.Customer);
-                domainEventPublisher.Publish(customer.Id.ToString(), customer.Id, customerWithEvents.Events);
+                domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, customerWithEvents.Events);
                 scope.Complete();
                 return customer;
             }

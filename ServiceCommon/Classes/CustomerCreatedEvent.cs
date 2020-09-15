@@ -8,7 +8,7 @@ namespace ServiceCommon.Classes
     public class CustomerCreatedEvent : ICustomerEvent
     {
         public String Name { get; set; }
-        private Money CreditLimit { get; set; }
+        public Money CreditLimit { get; set; }
         public CustomerCreatedEvent()
         {
         }

@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+    types:
+      - opened
+      - edited
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.201
+
+    - name: InitNuget
+      run: dotnet nuget  add source https://api.bintray.com/nuget/eventuateio-oss/eventuateio-dotnet-snapshots
+
+    - name: Build
+      run: ./test.sh

@@ -26,7 +26,6 @@ services:
       TRAM_SA_PASSWORD: "App@Passw0rd"
       TRAM_DB: "eventuate"
       TRAM_SCHEMA: "eventuate"
-      TRAM_SCHEMA2: "schema1"
     volumes:
     - ./TestDatabase:/scripts
     working_dir: /scripts

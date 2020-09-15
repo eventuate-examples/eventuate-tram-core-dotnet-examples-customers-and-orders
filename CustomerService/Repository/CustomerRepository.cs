@@ -20,10 +20,5 @@ namespace CustomerService.Repository
             _dbContext.SaveChanges();
             return customer;
         }
-        public Customer GetCustomer()
-        {
-            var cust = _dbContext.Customers.FirstOrDefault();
-            return cust;
-        }
     }
 }

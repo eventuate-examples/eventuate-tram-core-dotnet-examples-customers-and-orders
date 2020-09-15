@@ -9,6 +9,5 @@ namespace CustomerService.Repository
     public interface ICustomerRepository
     {
         Customer InsertCustomer(Customer Customer);
-        Customer GetCustomer();
     }
 }

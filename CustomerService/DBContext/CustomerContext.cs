@@ -11,7 +11,6 @@ namespace CustomerService.DBContext
     {
         public CustomerContext(DbContextOptions<CustomerContext> options) : base(options)
         {
-            this.Database.EnsureCreated();
         }
         public DbSet<Customer> Customers { get; set; }
     }

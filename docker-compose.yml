@@ -57,7 +57,22 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-      
+
+  customer-service-unittests:
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1
+    depends_on:
+    - zookeeper
+    - kafka
+    - db
+    - cdc-service
+    environment:
+      KafkaBootstrapServers: "kafka:29092"
+      ConnectionStrings__EventuateTramDbConnection: "Server=db;Database=TramDb;User Id=sa;Password=App@Passw0rd"
+    volumes:
+    - ./CustomerService.UnitTests/bin/Release/netcoreapp3.1:/app
+    working_dir: /app
+    entrypoint: [ "dotnet", "test", "CustomerService.UnitTests.dll", "--verbosity", "normal", "--logger", "trx" ]  
+  
   kafka:
     image: confluentinc/cp-kafka:5.5.0
     depends_on:

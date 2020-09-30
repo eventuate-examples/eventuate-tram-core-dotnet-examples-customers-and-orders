@@ -16,7 +16,6 @@ namespace CustomerService.Models
         public long Id { get; set; }
         [Column("name")]
         public string Name { get; set; }
-        [NotMapped]
         public Money CreditLimit { get; set; }
         [Column("creationtime")]
         public DateTime CreationTime { get; set; }

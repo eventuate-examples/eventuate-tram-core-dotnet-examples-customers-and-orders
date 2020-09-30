@@ -43,6 +43,19 @@ services:
     container_name: customer-service
     depends_on:
      - db
+     
+  order-service:
+    image: order-service
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    build:
+      context: .
+      dockerfile: DockerfileOrder
+    ports: 
+      - "8082:80"
+    container_name: order-service
+    depends_on:
+     - db
 
   db:
     image: "mcr.microsoft.com/mssql/server"

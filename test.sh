@@ -55,6 +55,7 @@ docker-compose up -d cdc-service
 
 # Run Service
 docker-compose up -d customer-service
+docker-compose up -d order-service
 
 #Run Tests
 dotnet build EndToEndTests/EndToEndTests.csproj
@@ -62,6 +63,6 @@ dotnet test EndToEndTests/EndToEndTests.csproj
 
 # Tear down test environment
 
-if [ -z "$KEEP_RUNNING" ] ; then
+if [ -z "$keep_running" ] ; then
   docker-compose down -v --remove-orphans
 fi

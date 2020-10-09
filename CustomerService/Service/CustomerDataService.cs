@@ -27,8 +27,8 @@ namespace CustomerService.Service
             using (var scope = new TransactionScope())
             {
                 ResultsWithEvents customerWithEvents = Create(name, creditLimit);
-                customer = customerRepository.InsertCustomer(customerWithEvents.customer);
-                domainEventPublisher.Publish(customer.id.ToString(), customer.id, customerWithEvents.events);
+                customer = customerRepository.InsertCustomer(customerWithEvents.Customer);
+                domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, customerWithEvents.Events);
                 scope.Complete();
                 return customer;
             }
@@ -36,7 +36,7 @@ namespace CustomerService.Service
         public static ResultsWithEvents Create(String name, Money creditLimit)
         {
             Customer customer = new Customer(name, creditLimit);
-            var customerCreatedEvent = new CustomerCreatedEvent(customer.name, customer.creditlimit);
+            var customerCreatedEvent = new CustomerCreatedEvent(customer.Name, customer.CreditLimit);
             List<IDomainEvent> eventList = new List<IDomainEvent>();
             eventList.Add(customerCreatedEvent);
             return new ResultsWithEvents(customer, eventList);

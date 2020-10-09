@@ -12,19 +12,22 @@ namespace CustomerService.Models
     [Table("Customer")]
     public class Customer
     {
-        public long id { get; set; }
-        public string name { get; set; }
+        [Column("id")]
+        public long Id { get; set; }
+        [Column("name")]
+        public string Name { get; set; }
         [NotMapped]
-        public Money creditlimit { get; set; }
-        public DateTime creationtime { get; set; }
+        public Money CreditLimit { get; set; }
+        [Column("creationtime")]
+        public DateTime CreationTime { get; set; }
         public Customer()
         {
         }
-        public Customer(String _name, Money _creditLimit)
+        public Customer(string name, Money creditLimit)
         {
-            name = _name;
-            creditlimit = _creditLimit;
-            creationtime = System.DateTime.Now;
+            Name = name;
+            CreditLimit = creditLimit;
+            CreationTime = System.DateTime.Now;
         }
 
     }

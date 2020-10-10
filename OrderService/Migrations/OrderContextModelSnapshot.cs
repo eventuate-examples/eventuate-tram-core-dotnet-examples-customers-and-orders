@@ -37,7 +37,7 @@ namespace OrderService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Order");
                 });
 
             modelBuilder.Entity("OrderService.Models.Order", b =>
@@ -55,7 +55,7 @@ namespace OrderService.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Orders");
+                            b1.ToTable("Order");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -73,7 +73,7 @@ namespace OrderService.Migrations
 
                                     b2.HasKey("OrderDetailsOrderId");
 
-                                    b2.ToTable("Orders");
+                                    b2.ToTable("Order");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OrderDetailsOrderId");

@@ -8,6 +8,8 @@ namespace OrderService.Repository
 {
     public interface IOrderRepository
     {
-        Order InsertOrder(Order order);
+        Order Add(Order order);
+        Order FindById(long orderId);
+        Order Update(Order order);
     }
 }

@@ -8,6 +8,9 @@ namespace CustomerService.Repository
 {
     public interface ICustomerRepository
     {
-        Customer InsertCustomer(Customer Customer);
+        Customer Add(Customer Customer);
+        Customer FindById(long customerId);
+        CreditReservation Add(CreditReservation creditReservation);
+        void Remove(CreditReservation creditReservation);
     }
 }

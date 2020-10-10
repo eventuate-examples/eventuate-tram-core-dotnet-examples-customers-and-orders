@@ -13,10 +13,11 @@ namespace CustomerService.DBContext
         {
         }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<CreditReservation> CreditReservations { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Customer>()
-                .OwnsOne(o => o.CreditLimit);
+            modelBuilder.Entity<CreditReservation>().OwnsOne(o => o.OrderTotal);
+            modelBuilder.Entity<Customer>().OwnsOne(o => o.CreditLimit);
         }
     }
 }

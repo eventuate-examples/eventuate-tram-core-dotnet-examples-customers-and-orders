@@ -27,7 +27,7 @@ namespace CustomerService.UnitTests.Repository
         [TestMethod]
         public void CustomerShouldbeCreated()
         {
-            var response = customerRepository.InsertCustomer(customer);
+            var response = customerRepository.Add(customer);
             // assert
             Assert.IsNotNull(response.Id);
         }

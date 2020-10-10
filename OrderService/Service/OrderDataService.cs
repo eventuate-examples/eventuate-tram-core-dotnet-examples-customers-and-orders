@@ -27,11 +27,39 @@ namespace OrderService.Service
             using (var scope = new TransactionScope())
             {
                 ResultsWithEvents orderWithEvents = Create(orderDetails);
-                order = orderRepository.InsertOrder(orderWithEvents.Order);
+                order = orderRepository.Add(orderWithEvents.Order);
                 domainEventPublisher.Publish(typeof(Order).Name, order.Id, orderWithEvents.Events);
                 scope.Complete();
                 return order;
             }
+        }
+        public void ApproveOrder(long orderId)
+        {
+            Order order = orderRepository.FindById(orderId);
+            if (order == null)
+            {
+                throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
+            }
+            order.State = OrderState.APPROVED;
+            orderRepository.Update(order);
+            List<IDomainEvent> eventList = new List<IDomainEvent>();
+            var orderApprovedEvent = new OrderApprovedEvent(order.OrderDetails);
+            eventList.Add(orderApprovedEvent);
+            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
+        }
+        public void RejectOrder(long orderId)
+        {
+            Order order = orderRepository.FindById(orderId);
+            if (order == null)
+            {
+                throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
+            }
+            order.State = OrderState.REJECTED;
+            orderRepository.Update(order);
+            List<IDomainEvent> eventList = new List<IDomainEvent>();
+            var orderRejectedEvent = new OrderRejectedEvent(order.OrderDetails);
+            eventList.Add(orderRejectedEvent);
+            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
         }
         public static ResultsWithEvents Create(OrderDetails orderDetails)
         {

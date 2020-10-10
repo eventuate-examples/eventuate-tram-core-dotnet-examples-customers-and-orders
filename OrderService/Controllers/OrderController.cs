@@ -17,17 +17,14 @@ namespace OrderService.Controllers
     [Route("[controller]")]
     public class OrderController : ControllerBase
     {
-        IOrderRepository orderRepository;
-        IDomainEventPublisher domainEventPublisher;
-        public OrderController(IOrderRepository _orderRepository, IDomainEventPublisher _domainEventPublisher)
+        OrderDataService orderService;
+        public OrderController(OrderDataService _orderService)
         {
-            orderRepository = _orderRepository;
-            domainEventPublisher = _domainEventPublisher;
+            orderService = _orderService;
         }
         [HttpPost]
         public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
         {
-            OrderDataService orderService = new OrderDataService(orderRepository, domainEventPublisher);
             OrderDetails orderDetails = new OrderDetails(request.CustomerId, request.OrderTotal);
             Order order = orderService.CreateOrder(orderDetails);
             CreateOrderResponse createOrderResponse = new CreateOrderResponse(order.Id);

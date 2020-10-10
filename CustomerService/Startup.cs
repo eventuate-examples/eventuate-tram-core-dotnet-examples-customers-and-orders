@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CustomerService.DBContext;
+using CustomerService.Models;
 using CustomerService.Repository;
+using CustomerService.Service;
 using IO.Eventuate.Tram;
+using IO.Eventuate.Tram.Events.Subscriber;
 using IO.Eventuate.Tram.Local.Kafka.Consumer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ServiceCommon.Classes;
 
 namespace CustomerService
 {
@@ -30,6 +34,13 @@ namespace CustomerService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            // Logging 
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
+                builder.AddConsole();
+                builder.AddDebug();
+            });
             //DbContext
             services.AddDbContext<CustomerContext>(o => o.UseSqlServer(Configuration.GetConnectionString("EventuateDB"), x => x.MigrationsHistoryTable("__EFMigrationsHistoryCustomer")));
             // Kafka Transport
@@ -41,8 +52,16 @@ namespace CustomerService
                });
             // Publisher
             services.AddEventuateTramEventsPublisher();
+            // Dispatcher
+            services.AddScoped<OrderEventConsumer>();
+            services.AddEventuateTramDomainEventDispatcher(Guid.NewGuid().ToString(),
+                provider => DomainEventHandlersBuilder.ForAggregateType("Order")
+                    .OnEvent<OrderCreatedEvent, OrderEventConsumer>()
+                    .Build());
             // Repository
             services.AddTransient<ICustomerRepository, CustomerRepository>();
+            // Service
+            services.AddScoped<CustomerDataService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

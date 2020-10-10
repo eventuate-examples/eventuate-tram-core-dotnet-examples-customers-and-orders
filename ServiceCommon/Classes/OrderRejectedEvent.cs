@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace ServiceCommon.Classes
 {
-    public class OrderCreatedEvent : IDomainEvent
+    public class OrderRejectedEvent : IDomainEvent
     {
         public OrderDetails OrderDetails { get; set; }
-        public OrderCreatedEvent()
+        public OrderRejectedEvent()
         {
         }
-        public OrderCreatedEvent(OrderDetails orderDetails)
+        public OrderRejectedEvent(OrderDetails orderDetails)
         {
             OrderDetails = orderDetails;
         }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OrderService.Models
 {
-    [Table("Orders")]
+    [Table("Order")]
     public class Order
     {
         [Column("id")]
@@ -26,6 +26,5 @@ namespace OrderService.Models
             OrderDetails = orderDetails;
             State = OrderState.PENDING;
         }
-
     }
 }

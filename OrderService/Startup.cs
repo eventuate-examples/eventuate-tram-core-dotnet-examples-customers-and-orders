@@ -14,6 +14,9 @@ using Microsoft.Extensions.Logging;
 using IO.Eventuate.Tram;
 using IO.Eventuate.Tram.Local.Kafka.Consumer;
 using OrderService.Repository;
+using OrderService.Service;
+using IO.Eventuate.Tram.Events.Subscriber;
+using ServiceCommon.Classes;
 
 namespace OrderService
 {
@@ -41,8 +44,18 @@ namespace OrderService
                });
             // Publisher
             services.AddEventuateTramEventsPublisher();
+            // Dispatcher
+            services.AddScoped<CustomerEventConsumer>();
+            services.AddEventuateTramDomainEventDispatcher(Guid.NewGuid().ToString(),
+                provider => DomainEventHandlersBuilder.ForAggregateType("Customer")
+                    .OnEvent<CustomerCreditReservedEvent, CustomerEventConsumer>()
+                    .OnEvent<CustomerValidationFailedEvent, CustomerEventConsumer>()
+                    .OnEvent<CustomerCreditReservationFailedEvent, CustomerEventConsumer>()
+                    .Build());
             // Repository
             services.AddTransient<IOrderRepository, OrderRepository>();
+            // Service
+            services.AddScoped<OrderDataService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

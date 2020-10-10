@@ -19,6 +19,23 @@ namespace CustomerService.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("CustomerService.Models.CreditReservation", b =>
+                {
+                    b.Property<long>("OrderId")
+                        .HasColumnName("orderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnName("customerId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("CreditReservations");
+                });
+
             modelBuilder.Entity("CustomerService.Models.Customer", b =>
                 {
                     b.Property<long>("Id")
@@ -38,6 +55,32 @@ namespace CustomerService.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customer");
+                });
+
+            modelBuilder.Entity("CustomerService.Models.CreditReservation", b =>
+                {
+                    b.HasOne("CustomerService.Models.Customer", null)
+                        .WithMany("CreditReservations")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("ServiceCommon.Classes.Money", "OrderTotal", b1 =>
+                        {
+                            b1.Property<long>("CreditReservationOrderId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<decimal>("Amount")
+                                .HasColumnName("amount")
+                                .HasColumnType("decimal(18,2)");
+
+                            b1.HasKey("CreditReservationOrderId");
+
+                            b1.ToTable("CreditReservations");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CreditReservationOrderId");
+                        });
                 });
 
             modelBuilder.Entity("CustomerService.Models.Customer", b =>

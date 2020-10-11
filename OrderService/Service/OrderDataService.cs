@@ -69,5 +69,10 @@ namespace OrderService.Service
             eventList.Add(orderCreatedEvent);
             return new ResultsWithEvents(order, eventList);
         }
+        public Order GetOrder(long id)
+        {
+            Order order = orderRepository.FindById(id);
+            return order;
+        }
     }
 }

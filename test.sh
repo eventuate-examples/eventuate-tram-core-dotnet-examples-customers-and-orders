@@ -63,6 +63,6 @@ dotnet test EndToEndTests/EndToEndTests.csproj
 
 # Tear down test environment
 
-if [ -z "$keep_running" ] ; then
+if [ -z "$KEEP_RUNNING" ] ; then
   docker-compose down -v --remove-orphans
 fi

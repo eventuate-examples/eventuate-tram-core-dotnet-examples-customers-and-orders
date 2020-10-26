@@ -37,7 +37,7 @@ services:
       - ASPNETCORE_URLS=http://0.0.0.0:80
     build:
       context: .
-      dockerfile: DockerfileCustomer
+      dockerfile: CustomerService/Dockerfile
     ports: 
       - "8081:80"
     container_name: customer-service
@@ -50,7 +50,7 @@ services:
       - ASPNETCORE_URLS=http://0.0.0.0:80
     build:
       context: .
-      dockerfile: DockerfileOrder
+      dockerfile: OrderService/Dockerfile
     ports: 
       - "8082:80"
     container_name: order-service

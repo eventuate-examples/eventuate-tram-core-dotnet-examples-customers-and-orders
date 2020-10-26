@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,7 +8,9 @@ namespace ServiceCommon.Classes
 {
     public class Money
     {
+        [NotMapped]
         public static Money ZERO = new Money(0);
+        [Column("amount")]
         public decimal Amount { get; set; }
 
         public Money()

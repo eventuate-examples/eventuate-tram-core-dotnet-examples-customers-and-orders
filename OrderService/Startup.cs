@@ -2,13 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CustomerService.DBContext;
-using CustomerService.Models;
-using CustomerService.Repository;
-using CustomerService.Service;
-using IO.Eventuate.Tram;
-using IO.Eventuate.Tram.Events.Subscriber;
-using IO.Eventuate.Tram.Local.Kafka.Consumer;
+using OrderService.DBContext;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -17,9 +11,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using IO.Eventuate.Tram;
+using IO.Eventuate.Tram.Local.Kafka.Consumer;
+using OrderService.Repository;
+using OrderService.Service;
+using IO.Eventuate.Tram.Events.Subscriber;
 using ServiceCommon.Classes;
 
-namespace CustomerService
+namespace OrderService
 {
     public class Startup
     {
@@ -34,34 +33,29 @@ namespace CustomerService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            // Logging 
-            services.AddLogging(builder =>
-            {
-                builder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
-                builder.AddConsole();
-                builder.AddDebug();
-            });
             //DbContext
-            services.AddDbContext<CustomerContext>(o => o.UseSqlServer(Configuration.GetConnectionString("EventuateDB"), x => x.MigrationsHistoryTable("__EFMigrationsHistoryCustomer")));
+            services.AddDbContext<OrderContext>(o => o.UseSqlServer(Configuration.GetConnectionString("EventuateDB"), x => x.MigrationsHistoryTable("__EFMigrationsHistoryOrder")));
             // Kafka Transport
             services.AddEventuateTramSqlKafkaTransport(Configuration.GetSection("EventuateTramDbSchema").Value, Configuration.GetSection("KafkaBootstrapServers").Value, EventuateKafkaConsumerConfigurationProperties.Empty(),
                (provider, o) =>
                {
-                   var applicationDbContext = provider.GetRequiredService<CustomerContext>();
+                   var applicationDbContext = provider.GetRequiredService<OrderContext>();
                    o.UseSqlServer(applicationDbContext.Database.GetDbConnection());
                });
             // Publisher
             services.AddEventuateTramEventsPublisher();
             // Dispatcher
-            services.AddScoped<OrderEventConsumer>();
+            services.AddScoped<CustomerEventConsumer>();
             services.AddEventuateTramDomainEventDispatcher(Guid.NewGuid().ToString(),
-                provider => DomainEventHandlersBuilder.ForAggregateType("Order")
-                    .OnEvent<OrderCreatedEvent, OrderEventConsumer>()
+                provider => DomainEventHandlersBuilder.ForAggregateType("Customer")
+                    .OnEvent<CustomerCreditReservedEvent, CustomerEventConsumer>()
+                    .OnEvent<CustomerValidationFailedEvent, CustomerEventConsumer>()
+                    .OnEvent<CustomerCreditReservationFailedEvent, CustomerEventConsumer>()
                     .Build());
             // Repository
-            services.AddTransient<ICustomerRepository, CustomerRepository>();
+            services.AddTransient<IOrderRepository, OrderRepository>();
             // Service
-            services.AddScoped<CustomerDataService>();
+            services.AddScoped<OrderDataService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -83,13 +77,14 @@ namespace CustomerService
                 endpoints.MapControllers();
             });
         }
+
         private static void UpdateDatabase(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope())
             {
-                using (var context = serviceScope.ServiceProvider.GetService<CustomerContext>())
+                using (var context = serviceScope.ServiceProvider.GetService<OrderContext>())
                 {
                     context.Database.Migrate();
                 }

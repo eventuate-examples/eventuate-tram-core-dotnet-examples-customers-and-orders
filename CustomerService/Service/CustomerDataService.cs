@@ -3,6 +3,7 @@ using CustomerService.Models;
 using CustomerService.Repository;
 using IO.Eventuate.Tram.Events.Common;
 using IO.Eventuate.Tram.Events.Publisher;
+using Microsoft.Extensions.Logging;
 using ServiceCommon.Classes;
 using System;
 using System.Collections.Generic;
@@ -23,23 +24,58 @@ namespace CustomerService.Service
         }
         public Customer CreateCustomer(String name, Money creditLimit)
         {
-            Customer customer;
+            Customer customer = new Customer();
             using (var scope = new TransactionScope())
             {
-                ResultsWithEvents customerWithEvents = Create(name, creditLimit);
-                customer = customerRepository.InsertCustomer(customerWithEvents.Customer);
+                ResultsWithEvents customerWithEvents = customer.Create(name, creditLimit);
+                customer = customerRepository.Add(customerWithEvents.Customer);
                 domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, customerWithEvents.Events);
                 scope.Complete();
                 return customer;
             }
         }
-        public static ResultsWithEvents Create(String name, Money creditLimit)
+        public void ReserveCredit(long orderId, long customerId, Money orderTotal)
         {
-            Customer customer = new Customer(name, creditLimit);
-            var customerCreatedEvent = new CustomerCreatedEvent(customer.Name, customer.CreditLimit);
-            List<IDomainEvent> eventList = new List<IDomainEvent>();
-            eventList.Add(customerCreatedEvent);
-            return new ResultsWithEvents(customer, eventList);
+
+            Customer customer = customerRepository.FindById(customerId);
+            if (customer == null)
+            {
+                var customerValidationFailedEvent = new CustomerValidationFailedEvent(orderId);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(customerValidationFailedEvent);
+                domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
+                return;
+            }
+            try
+            {
+                var creditReservation = customer.ReserveCredit(orderId, orderTotal);
+                customerRepository.Add(creditReservation);
+                CustomerCreditReservedEvent customerCreditReservedEvent = new CustomerCreditReservedEvent(orderId);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(customerCreditReservedEvent);
+                domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
+            }
+            catch (CustomerCreditLimitExceededException)
+            {
+                CustomerCreditReservationFailedEvent customerCreditReservationFailedEvent = new CustomerCreditReservationFailedEvent(orderId);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(customerCreditReservationFailedEvent);
+                domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
+            }
+        }
+        public void ReleaseCredit(long orderId, long customerId)
+        {
+            Customer customer = customerRepository.FindById(customerId);
+            if (customer == null)
+            {
+                var customerValidationFailedEvent = new CustomerValidationFailedEvent(orderId);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(customerValidationFailedEvent);
+                domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
+                return;
+            }
+            var creditReservation = customer.CreditReservations.Where(o => o.OrderId == orderId).FirstOrDefault();
+            customerRepository.Remove(creditReservation);
         }
     }
 }

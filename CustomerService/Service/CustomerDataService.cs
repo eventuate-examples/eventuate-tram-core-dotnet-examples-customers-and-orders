@@ -36,13 +36,11 @@ namespace CustomerService.Service
         }
         public void ReserveCredit(long orderId, long customerId, Money orderTotal)
         {
-
             Customer customer = customerRepository.FindById(customerId);
             if (customer == null)
             {
-                var customerValidationFailedEvent = new CustomerValidationFailedEvent(orderId);
                 List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(customerValidationFailedEvent);
+                eventList.Add(new CustomerValidationFailedEvent(orderId));
                 domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
                 return;
             }
@@ -50,16 +48,14 @@ namespace CustomerService.Service
             {
                 var creditReservation = customer.ReserveCredit(orderId, orderTotal);
                 customerRepository.Add(creditReservation);
-                CustomerCreditReservedEvent customerCreditReservedEvent = new CustomerCreditReservedEvent(orderId);
                 List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(customerCreditReservedEvent);
+                eventList.Add(new CustomerCreditReservedEvent(orderId));
                 domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
             }
             catch (CustomerCreditLimitExceededException)
             {
-                CustomerCreditReservationFailedEvent customerCreditReservationFailedEvent = new CustomerCreditReservationFailedEvent(orderId);
                 List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(customerCreditReservationFailedEvent);
+                eventList.Add(new CustomerCreditReservationFailedEvent(orderId));
                 domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
             }
         }
@@ -68,9 +64,8 @@ namespace CustomerService.Service
             Customer customer = customerRepository.FindById(customerId);
             if (customer == null)
             {
-                var customerValidationFailedEvent = new CustomerValidationFailedEvent(orderId);
                 List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(customerValidationFailedEvent);
+                eventList.Add(new CustomerValidationFailedEvent(orderId));
                 domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
                 return;
             }

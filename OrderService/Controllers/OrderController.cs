@@ -39,5 +39,13 @@ namespace OrderService.Controllers
             GetOrderResponse getOrderResponse = new GetOrderResponse(order.Id, order.OrderDetails, order.State, order.Version);
             return Ok(getOrderResponse);
         }
+        [HttpPost]
+        [Route("{id:long}/cancel")]
+        public IActionResult CancelOrder([FromRoute] long id)
+        {
+            Order order = orderService.CancelOrder(id);
+            CreateOrderResponse createOrderResponse = new CreateOrderResponse(order.Id);
+            return Ok(createOrderResponse);
+        }
     }
 }

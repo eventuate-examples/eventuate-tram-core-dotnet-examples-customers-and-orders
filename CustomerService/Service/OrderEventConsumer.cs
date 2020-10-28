@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CustomerService.Service
 {
-    public class OrderEventConsumer : IDomainEventHandler<OrderCreatedEvent>
+    public class OrderEventConsumer : IDomainEventHandler<OrderCreatedEvent>, IDomainEventHandler<OrderCancelledEvent>
     {
         private readonly ILogger logger;
         private CustomerDataService customerService;
@@ -21,6 +21,10 @@ namespace CustomerService.Service
         public void Handle(IDomainEventEnvelope<OrderCreatedEvent> orderCreatedEvent)
         {
             customerService.ReserveCredit(Convert.ToInt32(orderCreatedEvent.AggregateId), orderCreatedEvent.Event.OrderDetails.CustomerId, orderCreatedEvent.Event.OrderDetails.OrderTotal);
+        }
+        public void Handle(IDomainEventEnvelope<OrderCancelledEvent> orderCancelledEvent)
+        {
+            customerService.ReleaseCredit(Convert.ToInt32(orderCancelledEvent.AggregateId), orderCancelledEvent.Event.OrderDetails.CustomerId);
         }
 
     }

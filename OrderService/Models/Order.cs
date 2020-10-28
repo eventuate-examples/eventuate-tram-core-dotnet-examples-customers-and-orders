@@ -1,4 +1,5 @@
 ﻿using IO.Eventuate.Tram.Events.Common;
+using OrderService.Classes;
 using ServiceCommon.Classes;
 using System;
 using System.Collections.Generic;
@@ -26,5 +27,30 @@ namespace OrderService.Models
             OrderDetails = orderDetails;
             State = OrderState.PENDING;
         }
+        public Order NoteCreditReserved()
+        {
+            this.State = OrderState.APPROVED;
+            return this;
+        }
+
+        public Order NoteCreditReservationFailed()
+        {
+            this.State = OrderState.REJECTED;
+            return this;
+        }
+        public Order Cancel()
+        {
+            switch (State)
+            {
+                case OrderState.PENDING:
+                    throw new PendingOrderCantBeCancelledException();
+                case OrderState.APPROVED:
+                    this.State = OrderState.CANCELLED;
+                    return this;
+                default:
+                    throw new InvalidOperationException("Can't cancel in this state: " + State);
+            }
+        }
+
     }
 }

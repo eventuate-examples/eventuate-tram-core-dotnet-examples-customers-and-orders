@@ -57,6 +57,7 @@ namespace CustomerService
             services.AddEventuateTramDomainEventDispatcher(Guid.NewGuid().ToString(),
                 provider => DomainEventHandlersBuilder.ForAggregateType("Order")
                     .OnEvent<OrderCreatedEvent, OrderEventConsumer>()
+                    .OnEvent<OrderCancelledEvent, OrderEventConsumer>()
                     .Build());
             // Repository
             services.AddTransient<ICustomerRepository, CustomerRepository>();

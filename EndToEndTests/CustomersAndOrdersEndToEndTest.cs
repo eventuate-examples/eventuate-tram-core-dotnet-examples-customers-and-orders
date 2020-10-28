@@ -40,6 +40,22 @@ namespace EndToEndTests
             Assert.IsNotNull(orderId);
             AssertOrderState(orderId, OrderState.REJECTED);
         }
+        [TestMethod]
+        public void ShouldRejectForNonExistentCustomerId()
+        {
+            long customerId = System.DateTime.Today.Ticks;
+            long orderId = CreateOrder(customerId, "120.50");
+            AssertOrderState(orderId, OrderState.REJECTED);
+        }
+        [TestMethod]
+        public void ShouldCancel()
+        {
+            long customerId = CreateCustomer("Joe", "50.30");
+            long orderId = CreateOrder(customerId, "20.50");
+            AssertOrderState(orderId, OrderState.APPROVED);
+            CancelOrder(orderId);
+            AssertOrderState(orderId, OrderState.CANCELLED);
+        }
         private long CreateCustomer(string name, string amount)
         {
             CreateCustomerRequest request = new CreateCustomerRequest();
@@ -56,6 +72,11 @@ namespace EndToEndTests
             var orderResponse = WebApiHelper.WebApiCall<CreateOrderResponse>("POST", urlOrder, JsonSerializer.Serialize(request));
             return orderResponse.OrderId;
         }
+        private void CancelOrder(long orderId)
+        {
+            var orderResponse = WebApiHelper.WebApiCall<GetOrderResponse>("POST", urlOrder + "/" + orderId + "/cancel", null);
+        }
+
         private void AssertOrderState(long orderId, OrderState orderState)
         {
             Util.Eventually(100, 1000, () =>

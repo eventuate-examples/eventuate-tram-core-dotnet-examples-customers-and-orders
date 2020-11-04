@@ -31,5 +31,15 @@ namespace CustomerService.UnitTests.Repository
             // assert
             Assert.IsNotNull(response.Id);
         }
+        [TestMethod]
+        public void CustomerShouldbeFetched()
+        {
+            var response = customerRepository.Add(customer);
+            // assert
+            Assert.IsNotNull(response.Id);
+            var fetchedCustomer = customerRepository.FindById(response.Id);
+            // assert
+            Assert.IsNotNull(fetchedCustomer);
+        }
     }
 }

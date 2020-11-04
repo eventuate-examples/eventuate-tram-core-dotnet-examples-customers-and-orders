@@ -37,40 +37,52 @@ namespace CustomerService.Service
         public void ReserveCredit(long orderId, long customerId, Money orderTotal)
         {
             Customer customer = customerRepository.FindById(customerId);
-            if (customer == null)
+            using (var scope = new TransactionScope())
             {
-                List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(new CustomerValidationFailedEvent(orderId));
-                domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
-                return;
-            }
-            try
-            {
-                var creditReservation = customer.ReserveCredit(orderId, orderTotal);
-                customerRepository.Add(creditReservation);
-                List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(new CustomerCreditReservedEvent(orderId));
-                domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
-            }
-            catch (CustomerCreditLimitExceededException)
-            {
-                List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(new CustomerCreditReservationFailedEvent(orderId));
-                domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
+                if (customer == null)
+                {
+                    List<IDomainEvent> eventList = new List<IDomainEvent>();
+                    eventList.Add(new CustomerValidationFailedEvent(orderId));
+                    domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
+                }
+                else
+                {
+                    try
+                    {
+                        var creditReservation = customer.ReserveCredit(orderId, orderTotal);
+                        customerRepository.Add(creditReservation);
+                        List<IDomainEvent> eventList = new List<IDomainEvent>();
+                        eventList.Add(new CustomerCreditReservedEvent(orderId));
+                        domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
+                    }
+                    catch (CustomerCreditLimitExceededException)
+                    {
+                        List<IDomainEvent> eventList = new List<IDomainEvent>();
+                        eventList.Add(new CustomerCreditReservationFailedEvent(orderId));
+                        domainEventPublisher.Publish(typeof(Customer).Name, customer.Id, eventList);
+                    }
+                }
+                scope.Complete();
             }
         }
         public void ReleaseCredit(long orderId, long customerId)
         {
             Customer customer = customerRepository.FindById(customerId);
-            if (customer == null)
+            using (var scope = new TransactionScope())
             {
-                List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(new CustomerValidationFailedEvent(orderId));
-                domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
-                return;
+                if (customer == null)
+                {
+                    List<IDomainEvent> eventList = new List<IDomainEvent>();
+                    eventList.Add(new CustomerValidationFailedEvent(orderId));
+                    domainEventPublisher.Publish(typeof(Customer).Name, customerId, eventList);
+                }
+                else
+                {
+                    var creditReservation = customer.CreditReservations.Where(o => o.OrderId == orderId).FirstOrDefault();
+                    customerRepository.Remove(creditReservation);
+                }
+                scope.Complete();
             }
-            var creditReservation = customer.CreditReservations.Where(o => o.OrderId == orderId).FirstOrDefault();
-            customerRepository.Remove(creditReservation);
         }
     }
 }

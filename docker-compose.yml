@@ -85,6 +85,21 @@ services:
     - ./CustomerService.UnitTests/bin/Release/netcoreapp3.1:/app
     working_dir: /app
     entrypoint: [ "dotnet", "test", "CustomerService.UnitTests.dll", "--verbosity", "normal", "--logger", "trx" ]  
+    
+  order-service-unittests:
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1
+    depends_on:
+    - zookeeper
+    - kafka
+    - db
+    - cdc-service
+    environment:
+      KafkaBootstrapServers: "kafka:29092"
+      ConnectionStrings__EventuateTramDbConnection: "Server=db;Database=TramDb;User Id=sa;Password=App@Passw0rd"
+    volumes:
+    - ./OrderService.UnitTests/bin/Release/netcoreapp3.1:/app
+    working_dir: /app
+    entrypoint: [ "dotnet", "test", "OrderService.UnitTests.dll", "--verbosity", "normal", "--logger", "trx" ]  
   
   kafka:
     image: confluentinc/cp-kafka:5.5.0

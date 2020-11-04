@@ -40,11 +40,15 @@ namespace OrderService.Service
             {
                 throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
             }
-            order = order.NoteCreditReserved();
-            orderRepository.Update(order);
-            List<IDomainEvent> eventList = new List<IDomainEvent>();
-            eventList.Add(new OrderApprovedEvent(order.OrderDetails));
-            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
+            using (var scope = new TransactionScope())
+            {
+                order = order.NoteCreditReserved();
+                orderRepository.Update(order);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(new OrderApprovedEvent(order.OrderDetails));
+                domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
+                scope.Complete();
+            }
         }
         public void RejectOrder(long orderId)
         {
@@ -53,11 +57,15 @@ namespace OrderService.Service
             {
                 throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
             }
-            order = order.NoteCreditReservationFailed();
-            orderRepository.Update(order);
-            List<IDomainEvent> eventList = new List<IDomainEvent>();
-            eventList.Add(new OrderRejectedEvent(order.OrderDetails));
-            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
+            using (var scope = new TransactionScope())
+            {
+                order = order.NoteCreditReservationFailed();
+                orderRepository.Update(order);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(new OrderRejectedEvent(order.OrderDetails));
+                domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
+                scope.Complete();
+            }
         }
         public static ResultsWithEvents Create(OrderDetails orderDetails)
         {
@@ -78,12 +86,16 @@ namespace OrderService.Service
             {
                 throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
             }
-            order = order.Cancel();
-            orderRepository.Update(order);
-            List<IDomainEvent> eventList = new List<IDomainEvent>();
-            eventList.Add(new OrderCancelledEvent(order.OrderDetails));
-            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
-            return order;
+            using (var scope = new TransactionScope())
+            {
+                order = order.Cancel();
+                orderRepository.Update(order);
+                List<IDomainEvent> eventList = new List<IDomainEvent>();
+                eventList.Add(new OrderCancelledEvent(order.OrderDetails));
+                domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
+                scope.Complete();
+                return order;
+            }
         }
     }
 }

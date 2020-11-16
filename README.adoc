@@ -1,0 +1,11 @@
+= Eventuate Tram Customers and Orders - .NET version
+
+This is the .NET version of the https://github.com/eventuate-tram/eventuate-tram-examples-customers-and-orders/[Eventuate Tram Customers and Orders example application].
+
+image::https://github.com/eventuate-tram/eventuate-tram-examples-customers-and-orders/raw/master/images/Eventuate_Tram_Customer_and_Order_Architecture.png[]
+
+It illustrates how to build .NET microservices using the https://github.com/eventuate-tram/eventuate-tram-core-dotnet[.NET version of Eventuate Tram framework].
+This example application illustrates how to implement the following key patterns:
+
+* https://microservices.io/patterns/data/saga.html[Choreography-based sagas]
+* https://microservices.io/patterns/data/cqrs.html[CQRS view using MongoDB] (WIP)

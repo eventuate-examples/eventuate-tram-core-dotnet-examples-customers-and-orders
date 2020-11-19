@@ -49,6 +49,7 @@ fi
 docker-compose up -d zookeeper
 docker-compose up -d kafka
 docker-compose up -d cdc-service
+docker-compose up -d mongo
 
 # Wait for docker containers to start up
 ./wait-for-services.sh
@@ -56,6 +57,7 @@ docker-compose up -d cdc-service
 # Run Service
 docker-compose up -d customer-service
 docker-compose up -d order-service
+docker-compose up -d order-history-service
 
 #Run Tests
 dotnet build EndToEndTests/EndToEndTests.csproj

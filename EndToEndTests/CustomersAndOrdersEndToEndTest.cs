@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using ServiceCommon.Helpers;
 using System;
+using ServiceCommon.OrderHistoryCommon;
 
 namespace EndToEndTests
 {
@@ -19,6 +20,7 @@ namespace EndToEndTests
     {
         string urlCustomer = "http://localhost:8081/customer";
         string urlOrder = "http://localhost:8082/order";
+        string urlOrderHistory = "http://localhost:8083/customers";
         public CustomersAndOrdersEndToEndTest()
         {
         }
@@ -56,6 +58,31 @@ namespace EndToEndTests
             CancelOrder(orderId);
             AssertOrderState(orderId, OrderState.CANCELLED);
         }
+        [TestMethod]
+        public void ShouldRejectApproveAndKeepOrdersInHistory()
+        {
+            long customerId = CreateCustomer("Joe", "1000");
+            long order1Id = CreateOrder(customerId, "100");
+            AssertOrderState(order1Id, OrderState.APPROVED);
+            long order2Id = CreateOrder(customerId, "1000");
+            AssertOrderState(order2Id, OrderState.REJECTED);
+            Util.Eventually(100, 1000, () =>
+            {
+                CustomerView customerView = GetCustomerView(customerId);
+                var orders = customerView.Orders;
+                Assert.AreEqual(2, orders.Count);
+                Assert.AreEqual(orders[order1Id].State, OrderState.APPROVED);
+                Assert.AreEqual(orders[order2Id].State, OrderState.REJECTED);
+            });
+        }
+
+        private CustomerView GetCustomerView(long customerId)
+        {
+            var customerView = WebApiHelper.WebApiCall<CustomerView>("GET", urlOrderHistory + "/" + customerId, null);
+            Assert.IsNotNull(customerView);
+            return customerView;
+        }
+
         private long CreateCustomer(string name, string amount)
         {
             CreateCustomerRequest request = new CreateCustomerRequest();

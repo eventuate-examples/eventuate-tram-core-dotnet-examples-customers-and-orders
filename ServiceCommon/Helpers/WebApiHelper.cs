@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ServiceCommon.Custom;
+using ServiceCommon.OrderHistoryCommon;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -61,6 +63,7 @@ namespace ServiceCommon.Helpers
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
+            options.Converters.Add(new CustomDictionaryJsonConverter<long, OrderInfo>());
             return options;
         }
     }

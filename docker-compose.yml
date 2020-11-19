@@ -56,6 +56,19 @@ services:
     container_name: order-service
     depends_on:
      - db
+     
+  order-history-service:
+    image: order-history-service
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    build:
+      context: .
+      dockerfile: OrderHistoryService/Dockerfile
+    ports: 
+      - "8083:80"
+    container_name: order-history-service
+    depends_on:
+     - mongo   
 
   db:
     image: "mcr.microsoft.com/mssql/server"
@@ -63,7 +76,16 @@ services:
         SA_PASSWORD: "App@Passw0rd"
         ACCEPT_EULA: "Y"
     ports:
-      - "1433:1433"      
+      - "1433:1433" 
+   
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: AppPassw0rd
+    ports:
+      - 27017:27017  
       
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderHistoryService", "OrderHistoryService.csproj", "{80AADC46-C440-4A5E-91E2-86D8C7D0B441}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceCommon", "..\ServiceCommon\ServiceCommon.csproj", "{33CADF8D-6262-4F49-88F8-B031494F3C7C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80AADC46-C440-4A5E-91E2-86D8C7D0B441}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80AADC46-C440-4A5E-91E2-86D8C7D0B441}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80AADC46-C440-4A5E-91E2-86D8C7D0B441}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80AADC46-C440-4A5E-91E2-86D8C7D0B441}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C1382534-CFC5-4219-9291-E206347EAC44}
+	EndGlobalSection
+EndGlobal

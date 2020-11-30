@@ -9,6 +9,7 @@ using IO.Eventuate.Tram.Events.Publisher;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
+using ServiceCommon.Classes;
 using ServiceCommon.Common;
 
 namespace CustomerService.Controllers
@@ -17,17 +18,14 @@ namespace CustomerService.Controllers
     [Route("[controller]")]
     public class CustomerController : ControllerBase
     {
-        ICustomerRepository customerRepository;
-        IDomainEventPublisher domainEventPublisher;
-        public CustomerController(ICustomerRepository _customerRepository, IDomainEventPublisher _domainEventPublisher)
+        CustomerDataService customerService;
+        public CustomerController(CustomerDataService _customerService)
         {
-            customerRepository = _customerRepository;
-            domainEventPublisher = _domainEventPublisher;
+            customerService = _customerService;
         }
         [HttpPost]
         public IActionResult CreateCustomer([FromBody] CreateCustomerRequest request)
         {
-            CustomerDataService customerService = new CustomerDataService(customerRepository, domainEventPublisher);
             Customer customer = customerService.CreateCustomer(request.Name, request.CreditLimit);
             CreateCustomerResponse createCustomerResponse = new CreateCustomerResponse(customer.Id);
             return Ok(createCustomerResponse);

@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="IO.Eventuate.Tram" Version="0.3.0-preview-4" />
+    <PackageReference Include="MongoDB.Bson" Version="2.11.4" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 
 </Project>

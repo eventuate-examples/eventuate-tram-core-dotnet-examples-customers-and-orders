@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServiceCommon.Classes;
+using ServiceCommon.Helpers;
 using System;
 
 namespace CustomerService.UnitTests.Service
@@ -18,10 +19,10 @@ namespace CustomerService.UnitTests.Service
     [TestClass]
     public class CustomerServiceTests
     {
-        CustomerDataService customerDataService;
+        CustomerService.Service.CustomerService customerService;
         Money creditLimit;
         IDomainEventPublisher domainEventPublisher;
-        TestCustomerEventConsumer consumer;
+        TestEventConsumer consumer;
 
         [TestInitialize]
         public void Setup()
@@ -36,20 +37,20 @@ namespace CustomerService.UnitTests.Service
                 (provider, o) =>
                 {
                     var applicationDbContext = provider.GetRequiredService<CustomerContext>();
-                    applicationDbContext.Database.Migrate();
+                    //applicationDbContext.Database.Migrate();
                     o.UseSqlServer(applicationDbContext.Database.GetDbConnection());
                 });
              // Publisher
              services.AddEventuateTramEventsPublisher();
              // Consumer
-             services.AddSingleton<TestCustomerEventConsumer>();
+             services.AddSingleton<TestEventConsumer>();
              // Dispatcher
              services.AddEventuateTramDomainEventDispatcher(Guid.NewGuid().ToString(),
              provider => DomainEventHandlersBuilder.ForAggregateType(typeof(Customer).Name)
-              .OnEvent<CustomerCreatedEvent, TestCustomerEventConsumer>()
-              .OnEvent<CustomerValidationFailedEvent, TestCustomerEventConsumer>()
-              .OnEvent<CustomerCreditReservedEvent, TestCustomerEventConsumer>()
-              .OnEvent<CustomerCreditReservationFailedEvent, TestCustomerEventConsumer>()
+              .OnEvent<CustomerCreatedEvent, TestEventConsumer>()
+              .OnEvent<CustomerValidationFailedEvent, TestEventConsumer>()
+              .OnEvent<CustomerCreditReservedEvent, TestEventConsumer>()
+              .OnEvent<CustomerCreditReservationFailedEvent, TestEventConsumer>()
               .Build());
              // Repository
              services.AddTransient<ICustomerRepository, CustomerRepository>();
@@ -58,69 +59,33 @@ namespace CustomerService.UnitTests.Service
 
             //Services
             domainEventPublisher = host.Services.GetService<IDomainEventPublisher>();
-            consumer = host.Services.GetService<TestCustomerEventConsumer>();
+            consumer = host.Services.GetService<TestEventConsumer>();
             var customerRepository = host.Services.GetService<ICustomerRepository>();
-            customerDataService = new CustomerDataService(customerRepository, domainEventPublisher);
+            customerService = new CustomerService.Service.CustomerService(customerRepository, domainEventPublisher);
             //Initialize Money
             creditLimit = new Money("12.10");
-        }
-        [TestMethod]
-        public void CustomerShouldbeCreatedAndEventShouldbePublished()
-        {
-            //Create Customer
-            var customer = customerDataService.CreateCustomer("Joe", creditLimit);
-            // assert
-            Assert.IsNotNull(customer.Id);
-            CustomerCreatedEvent customerCreatedEvent;
-            consumer.GetCustomerCreatedEventQueue().TryTake(out customerCreatedEvent, TimeSpan.FromSeconds(20));
-
-            Assert.IsNotNull(customerCreatedEvent);
-            Assert.AreEqual("Joe", customerCreatedEvent.Name);
         }
 
         [TestMethod]
         public void ReserveCreditAndEventShouldBePublished()
         {
             //Create Customer
-            var customer = customerDataService.CreateCustomer("Joe", creditLimit);
-            // assert
-            Assert.IsNotNull(customer.Id);
-            CustomerCreatedEvent customerCreatedEvent;
-            consumer.GetCustomerCreatedEventQueue().TryTake(out customerCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreatedEvent);
-            Assert.AreEqual("Joe", customerCreatedEvent.Name);
-
+            long customerId = CreateCustomer();
             //Reserve Credit
             Money orderTotal = new Money("5.10");
-            long orderId = System.DateTime.Now.Ticks;
-            customerDataService.ReserveCredit(orderId, customer.Id, orderTotal);
-            CustomerCreditReservedEvent customerCreditReservedEvent;
-            consumer.GetCustomerCreditReservedEventQueue().TryTake(out customerCreditReservedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreditReservedEvent);
+            customerService.ReserveCredit(System.DateTime.Now.Ticks, customerId, orderTotal);
+            AssertEvent<CustomerCreditReservedEvent>();
         }
         [TestMethod]
         public void CreditLimitExceededExceptionEventShouldBePublished()
         {
             //Create Customer
-            var customer = customerDataService.CreateCustomer("Joe", creditLimit);
-            //assert
-            Assert.IsNotNull(customer.Id);
-            CustomerCreatedEvent customerCreatedEvent;
-            consumer.GetCustomerCreatedEventQueue().TryTake(out customerCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreatedEvent);
-            Assert.AreEqual("Joe", customerCreatedEvent.Name);
-
+            long customerId = CreateCustomer();
             //Reserve Credit with OrderTotal more than Customer's CreditLimit 
             Money orderTotal = new Money("20.10");
-            long orderId = System.DateTime.Now.Ticks;
-            customerDataService.ReserveCredit(orderId, customer.Id, orderTotal);
-            CustomerCreditReservationFailedEvent customerCreditReservationFailedEvent;
-            consumer.GetCustomerCreditReservationFailedEventQueue().TryTake(out customerCreditReservationFailedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreditReservationFailedEvent);
+            customerService.ReserveCredit(System.DateTime.Now.Ticks, customerId, orderTotal);
+            AssertEvent<CustomerCreditReservationFailedEvent>();
+
         }
 
         [TestMethod]
@@ -128,47 +93,63 @@ namespace CustomerService.UnitTests.Service
         {
             //Reserve Credit with random CustomerId
             Money orderTotal = new Money("20.10");
-            long orderId = System.DateTime.Now.Ticks;
-            long customerId = System.DateTime.Now.Ticks;
-            customerDataService.ReserveCredit(orderId, customerId, orderTotal);
-            CustomerValidationFailedEvent customerValidationFailedEvent;
-            consumer.GetCustomerValidationFailedEventQueue().TryTake(out customerValidationFailedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerValidationFailedEvent);
+            customerService.ReserveCredit(System.DateTime.Now.Ticks, System.DateTime.Now.Ticks, orderTotal);
+            AssertEvent<CustomerValidationFailedEvent>();
         }
 
         [TestMethod]
         public void ReleaseCreditAndEventShouldBePublished()
         {
             //Create Customer
-            var customer = customerDataService.CreateCustomer("Joe", creditLimit);
-            //assert
-            Assert.IsNotNull(customer.Id);
-            CustomerCreatedEvent customerCreatedEvent;
-            consumer.GetCustomerCreatedEventQueue().TryTake(out customerCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreatedEvent);
-            Assert.AreEqual("Joe", customerCreatedEvent.Name);
-
+            long customerId = CreateCustomer();
             //Reserve Credit
             Money orderTotal = new Money("10.10");
             long orderId = System.DateTime.Now.Ticks;
-            customerDataService.ReserveCredit(orderId, customer.Id, orderTotal);
-            CustomerCreditReservedEvent customerCreditReservedEvent;
-            consumer.GetCustomerCreditReservedEventQueue().TryTake(out customerCreditReservedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreditReservedEvent);
+            customerService.ReserveCredit(orderId, customerId, orderTotal);
+            AssertEvent<CustomerCreditReservedEvent>();
 
             //Release Credit
-            customerDataService.ReleaseCredit(orderId, customer.Id);
+            customerService.ReleaseCredit(orderId, customerId);            
 
             //Reserve Credit again
-            customerDataService.ReserveCredit(System.DateTime.Now.Ticks, customer.Id, orderTotal);
-            CustomerCreditReservedEvent customerCreditReservedEventAfterRelease;
-            consumer.GetCustomerCreditReservedEventQueue().TryTake(out customerCreditReservedEventAfterRelease, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(customerCreditReservedEventAfterRelease);
+            customerService.ReserveCredit(System.DateTime.Now.Ticks, customerId, orderTotal);
+            AssertEvent<CustomerCreditReservedEvent>();
 
+        }
+
+        private long CreateCustomer()
+        {
+            var customer = customerService.CreateCustomer("Joe", creditLimit);
+            AssertEvent<CustomerCreatedEvent>();
+            //assert
+            Assert.AreEqual("Joe", customer.Name);
+            return customer.Id;
+        }
+        private void AssertEvent<T>()
+        {
+            Util.Eventually(50, 1000, () =>
+            {
+                var eventList = consumer.GetEvents();
+                if (eventList.Count == 0)
+                {
+                    throw new System.InvalidOperationException("Event not found");
+                }
+                foreach (var domainEvent in eventList)
+                {
+                    try
+                    {
+                        T customerEvent = (T)domainEvent;
+                        //Assert
+                        Assert.IsNotNull(customerEvent);
+                        consumer.RemoveEvent(domainEvent);
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+            });
         }
     }
 }

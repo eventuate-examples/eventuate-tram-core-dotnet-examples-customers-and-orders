@@ -55,7 +55,7 @@ namespace OrderService
             // Repository
             services.AddTransient<IOrderRepository, OrderRepository>();
             // Service
-            services.AddScoped<OrderDataService>();
+            services.AddScoped<Service.OrderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

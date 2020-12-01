@@ -18,8 +18,8 @@ namespace CustomerService.Controllers
     [Route("[controller]")]
     public class CustomerController : ControllerBase
     {
-        CustomerDataService customerService;
-        public CustomerController(CustomerDataService _customerService)
+        Service.CustomerService customerService;
+        public CustomerController(Service.CustomerService _customerService)
         {
             customerService = _customerService;
         }

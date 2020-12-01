@@ -63,6 +63,14 @@ docker-compose up -d order-history-service
 dotnet build EndToEndTests/EndToEndTests.csproj
 dotnet test EndToEndTests/EndToEndTests.csproj 
 
+#Run Customer-Service Tests
+dotnet build CustomerService.UnitTests/CustomerService.UnitTests.csproj -c release
+docker-compose run --rm customer-service-unittests
+
+#Run Order-Service Tests
+dotnet build OrderService.UnitTests/OrderService.UnitTests.csproj -c release
+docker-compose run --rm order-service-unittests
+
 # Tear down test environment
 
 if [ -z "$KEEP_RUNNING" ] ; then

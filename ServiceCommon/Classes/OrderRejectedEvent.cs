@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServiceCommon.Classes
 {
-    public class OrderRejectedEvent : IDomainEvent
+    public class OrderRejectedEvent : IOrderEvent
     {
         public OrderDetails OrderDetails { get; set; }
         public OrderRejectedEvent()

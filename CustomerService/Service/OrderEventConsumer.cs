@@ -12,8 +12,8 @@ namespace CustomerService.Service
     public class OrderEventConsumer : IDomainEventHandler<OrderCreatedEvent>, IDomainEventHandler<OrderCancelledEvent>
     {
         private readonly ILogger logger;
-        private CustomerDataService customerService;
-        public OrderEventConsumer(ILogger<CustomerCreatedEvent> _logger, CustomerDataService _customerService)
+        private CustomerService customerService;
+        public OrderEventConsumer(ILogger<CustomerCreatedEvent> _logger, CustomerService _customerService)
         {
             logger = _logger;
             customerService = _customerService;

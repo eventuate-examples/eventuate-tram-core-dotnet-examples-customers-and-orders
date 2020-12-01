@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServiceCommon.Classes
 {
-    public class OrderCreatedEvent : IDomainEvent
+    public class OrderCreatedEvent : IOrderEvent
     {
         public OrderDetails OrderDetails { get; set; }
         public OrderCreatedEvent()

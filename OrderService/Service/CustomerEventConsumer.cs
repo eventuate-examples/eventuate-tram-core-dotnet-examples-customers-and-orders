@@ -12,8 +12,8 @@ namespace OrderService.Service
     public class CustomerEventConsumer : IDomainEventHandler<CustomerCreditReservedEvent>, IDomainEventHandler<CustomerValidationFailedEvent>, IDomainEventHandler<CustomerCreditReservationFailedEvent>
     {
         private readonly ILogger logger;
-        private OrderDataService orderService;
-        public CustomerEventConsumer(ILogger<CustomerCreatedEvent> _logger, OrderDataService _orderService)
+        private OrderService orderService;
+        public CustomerEventConsumer(ILogger<CustomerCreatedEvent> _logger, OrderService _orderService)
         {
             logger = _logger;
             orderService = _orderService;

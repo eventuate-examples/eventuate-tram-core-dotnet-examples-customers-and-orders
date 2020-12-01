@@ -104,7 +104,7 @@ services:
       KafkaBootstrapServers: "kafka:29092"
       ConnectionStrings__EventuateTramDbConnection: "Server=db;Database=TramDb;User Id=sa;Password=App@Passw0rd"
     volumes:
-    - ./CustomerService.UnitTests/bin/Release/netcoreapp3.1:/app/customer-service-unittests
+    - ./CustomerService.UnitTests/bin/release/netcoreapp3.1:/app/customer-service-unittests
     working_dir: /app/customer-service-unittests
     entrypoint: [ "dotnet", "test", "CustomerService.UnitTests.dll", "--verbosity", "normal", "--logger", "trx" ]  
     
@@ -119,7 +119,7 @@ services:
       KafkaBootstrapServers: "kafka:29092"
       ConnectionStrings__EventuateTramDbConnection: "Server=db;Database=TramDb;User Id=sa;Password=App@Passw0rd"
     volumes:
-    - ./OrderService.UnitTests/bin/Release/netcoreapp3.1:/app/order-service-unittests
+    - ./OrderService.UnitTests/bin/release/netcoreapp3.1:/app/order-service-unittests
     working_dir: /app/order-service-unittests
     entrypoint: [ "dotnet", "test", "OrderService.UnitTests.dll", "--verbosity", "normal", "--logger", "trx" ]  
   

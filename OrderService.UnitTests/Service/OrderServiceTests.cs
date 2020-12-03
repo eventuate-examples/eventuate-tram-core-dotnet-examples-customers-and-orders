@@ -39,7 +39,7 @@ namespace OrderService.UnitTests.Service
                 (provider, o) =>
                 {
                     var applicationDbContext = provider.GetRequiredService<OrderContext>();
-                   // applicationDbContext.Database.Migrate();
+                    applicationDbContext.Database.Migrate();
                     o.UseSqlServer(applicationDbContext.Database.GetDbConnection());
                 });
              // Publisher

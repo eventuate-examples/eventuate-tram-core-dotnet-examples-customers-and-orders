@@ -32,7 +32,7 @@ else
   dotnet nuget add source https://api.bintray.com/nuget/eventuateio-oss/eventuateio-dotnet-snapshots
 fi
 
-#docker-compose build
+docker-compose build
 
 if [ -z "$USE_EXISTING_CONTAINERS" ] ; then
   docker-compose down

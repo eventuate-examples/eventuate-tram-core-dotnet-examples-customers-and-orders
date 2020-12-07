@@ -12,11 +12,11 @@ using System.Transactions;
 
 namespace OrderService.Service
 {
-    public class OrderDataService
+    public class OrderService
     {
         private IOrderRepository orderRepository;
         private IDomainEventPublisher domainEventPublisher;
-        public OrderDataService(IOrderRepository _orderRepository, IDomainEventPublisher _domainEventPublisher)
+        public OrderService(IOrderRepository _orderRepository, IDomainEventPublisher _domainEventPublisher)
         {
             orderRepository = _orderRepository;
             domainEventPublisher = _domainEventPublisher;
@@ -40,15 +40,11 @@ namespace OrderService.Service
             {
                 throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
             }
-            using (var scope = new TransactionScope())
-            {
-                order = order.NoteCreditReserved();
-                orderRepository.Update(order);
-                List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(new OrderApprovedEvent(order.OrderDetails));
-                domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
-                scope.Complete();
-            }
+            order = order.NoteCreditReserved();
+            orderRepository.Update(order);
+            List<IDomainEvent> eventList = new List<IDomainEvent>();
+            eventList.Add(new OrderApprovedEvent(order.OrderDetails));
+            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
         }
         public void RejectOrder(long orderId)
         {
@@ -57,15 +53,11 @@ namespace OrderService.Service
             {
                 throw new System.ArgumentException(string.Format("Order with id {0} not found", orderId));
             }
-            using (var scope = new TransactionScope())
-            {
-                order = order.NoteCreditReservationFailed();
-                orderRepository.Update(order);
-                List<IDomainEvent> eventList = new List<IDomainEvent>();
-                eventList.Add(new OrderRejectedEvent(order.OrderDetails));
-                domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
-                scope.Complete();
-            }
+            order = order.NoteCreditReservationFailed();
+            orderRepository.Update(order);
+            List<IDomainEvent> eventList = new List<IDomainEvent>();
+            eventList.Add(new OrderRejectedEvent(order.OrderDetails));
+            domainEventPublisher.Publish(typeof(Order).Name, order.Id, eventList);
         }
         public static ResultsWithEvents Create(OrderDetails orderDetails)
         {

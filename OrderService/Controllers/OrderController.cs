@@ -18,8 +18,8 @@ namespace OrderService.Controllers
     [Route("[controller]")]
     public class OrderController : ControllerBase
     {
-        OrderDataService orderService;
-        public OrderController(OrderDataService _orderService)
+        Service.OrderService orderService;
+        public OrderController(Service.OrderService _orderService)
         {
             orderService = _orderService;
         }

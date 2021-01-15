@@ -12,15 +12,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ServiceCommon.Classes;
 using System;
 using IO.Eventuate.Tram.Events.Subscriber;
+using IO.Eventuate.Tram.Events.Common;
+using Microsoft.Extensions.Logging;
+using ServiceCommon.Helpers;
 
 namespace OrderService.UnitTests.Service
 {
     [TestClass]
     public class OrderServiceTests
     {
-        OrderDataService orderDataService;
+        OrderService.Service.OrderService orderService;
         IDomainEventPublisher domainEventPublisher;
-        TestOrderEventConsumer consumer;
+        TestEventConsumer consumer;
         OrderDetails orderDetails;
 
         [TestInitialize]
@@ -42,14 +45,14 @@ namespace OrderService.UnitTests.Service
              // Publisher
              services.AddEventuateTramEventsPublisher();
              // Consumer
-             services.AddSingleton<TestOrderEventConsumer>();
+             services.AddSingleton<TestEventConsumer>();
              // Dispatcher
              services.AddEventuateTramDomainEventDispatcher(Guid.NewGuid().ToString(),
             provider => DomainEventHandlersBuilder.ForAggregateType(typeof(Order).Name)
-                .OnEvent<OrderCreatedEvent, TestOrderEventConsumer>()
-                .OnEvent<OrderCancelledEvent, TestOrderEventConsumer>()
-                .OnEvent<OrderRejectedEvent, TestOrderEventConsumer>()
-                .OnEvent<OrderApprovedEvent, TestOrderEventConsumer>()
+                .OnEvent<OrderCreatedEvent, TestEventConsumer>()
+                .OnEvent<OrderCancelledEvent, TestEventConsumer>()
+                .OnEvent<OrderRejectedEvent, TestEventConsumer>()
+                .OnEvent<OrderApprovedEvent, TestEventConsumer>()
                 .Build());
              // Repository
              services.AddTransient<IOrderRepository, OrderRepository>();
@@ -58,85 +61,76 @@ namespace OrderService.UnitTests.Service
 
             //Services
             domainEventPublisher = host.Services.GetService<IDomainEventPublisher>();
-            consumer = host.Services.GetService<TestOrderEventConsumer>();
+            consumer = host.Services.GetService<TestEventConsumer>();
             var orderRepository = host.Services.GetService<IOrderRepository>();
-            orderDataService = new OrderDataService(orderRepository, domainEventPublisher);
+            orderService = new OrderService.Service.OrderService(orderRepository, domainEventPublisher);
             //Initialize Money
             Money orderTotal = new Money("12.10");
             orderDetails = new OrderDetails(1, orderTotal);
         }
         [TestMethod]
-        public void OrderShouldbeCreated()
-        {
-            //Create Order
-            var order = orderDataService.CreateOrder(orderDetails);
-            //assert
-            Assert.IsNotNull(order.Id);
-            OrderCreatedEvent orderCreatedEvent;
-            consumer.GetOrderCreatedEventQueue().TryTake(out orderCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(orderCreatedEvent);
-            Assert.AreEqual(orderDetails.OrderTotal.Amount, orderCreatedEvent.OrderDetails.OrderTotal.Amount);
-        }
-        [TestMethod]
         public void OrderShouldbeApprovedAndEventShouldbePublished()
         {
             //Create Order
-            var order = orderDataService.CreateOrder(orderDetails);
-            //assert
+            var order = orderService.CreateOrder(orderDetails);
             Assert.IsNotNull(order.Id);
-            OrderCreatedEvent orderCreatedEvent;
-            consumer.GetOrderCreatedEventQueue().TryTake(out orderCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(orderCreatedEvent);
+            AssertEvent<OrderCreatedEvent>();
 
             //Approve Order
-            orderDataService.ApproveOrder(order.Id);
-            OrderApprovedEvent orderApprovedEvent;
-            consumer.GetOrderApprovedEventQueue().TryTake(out orderApprovedEvent, TimeSpan.FromSeconds(20));
-            // assert
-            Assert.IsNotNull(orderApprovedEvent);
+            orderService.ApproveOrder(order.Id);
+            AssertEvent<OrderApprovedEvent>();
         }
         [TestMethod]
         public void OrderShouldbeCancelledAndEventShouldbePublished()
         {
-            //Create order
-            var order = orderDataService.CreateOrder(orderDetails);
-            //assert
+            //Create Order
+            var order = orderService.CreateOrder(orderDetails);
             Assert.IsNotNull(order.Id);
-            OrderCreatedEvent orderCreatedEvent;
-            consumer.GetOrderCreatedEventQueue().TryTake(out orderCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(orderCreatedEvent);
-
-            //Order should be approved before cancellation
-            orderDataService.ApproveOrder(order.Id);
-
+            AssertEvent<OrderCreatedEvent>();
+            //Approve Order
+            orderService.ApproveOrder(order.Id);
+            AssertEvent<OrderApprovedEvent>();
             //Cancel Order
-            orderDataService.CancelOrder(order.Id);
-            OrderCancelledEvent orderCancelledEvent;
-            consumer.GetOrderCancelledEventQueue().TryTake(out orderCancelledEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(orderCancelledEvent);
+            orderService.CancelOrder(order.Id);
+            AssertEvent<OrderCancelledEvent>();
         }
         [TestMethod]
         public void OrderShouldbeRejectedAndEventShouldbePublished()
         {
             //Create Order
-            var order = orderDataService.CreateOrder(orderDetails);
-            //assert
+            var order = orderService.CreateOrder(orderDetails);
             Assert.IsNotNull(order.Id);
-            OrderCreatedEvent orderCreatedEvent;
-            consumer.GetOrderCreatedEventQueue().TryTake(out orderCreatedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(orderCreatedEvent);
-
+            AssertEvent<OrderCreatedEvent>();
             //Reject Order
-            orderDataService.RejectOrder(order.Id);
-            OrderRejectedEvent orderRejectedEvent;
-            consumer.GetOrderRejectedEventQueue().TryTake(out orderRejectedEvent, TimeSpan.FromSeconds(20));
-            //assert
-            Assert.IsNotNull(orderRejectedEvent);
+            orderService.RejectOrder(order.Id);
+            AssertEvent<OrderRejectedEvent>();
+        }
+        private void AssertEvent<T>()
+        {
+            Util.Eventually(50, 1000, () =>
+            {
+                var eventList = consumer.GetEvents();
+                if (eventList.Count == 0)
+                {
+                    throw new System.InvalidOperationException("Event not found");
+                }
+                foreach (var domainEvent in eventList)
+                {
+                    try
+                    {
+                        T orderEvent = (T)domainEvent;
+                        //Assert
+                        Assert.IsNotNull(orderEvent);
+                        Assert.AreEqual(orderDetails.OrderTotal.Amount, ((OrderDetails)orderEvent.GetType().GetProperty("OrderDetails").GetValue(orderEvent)).OrderTotal.Amount);
+                        consumer.RemoveEvent(domainEvent);
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+            });
         }
     }
 }

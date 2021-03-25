@@ -68,7 +68,7 @@ services:
       - "8083:80"
     container_name: order-history-service
     depends_on:
-     - mongo   
+     - mongo 
 
   db:
     image: "mcr.microsoft.com/mssql/server"
@@ -156,4 +156,35 @@ services:
       EVENTUATE_CDC_PIPELINE_PIPELINE1_TYPE: eventuate-tram
       EVENTUATE_CDC_PIPELINE_PIPELINE1_READER: READER1
       EVENTUATE_CDC_PIPELINE_PIPELINE1_EVENTUATEDATABASESCHEMA: eventuate
-   
+      
+  order-history-text-search-service:
+    image: order-history-text-search-service
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+    build:
+      context: .
+      dockerfile: OrderHistoryTextSearchService/Dockerfile
+    ports: 
+      - "8084:80"
+    container_name: order-history-text-search-service
+    # networks:
+        # - esnetwork
+    depends_on:
+     - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
+    ports:
+        - "9200:9200"
+        - "9300:9300"
+    volumes:
+        - esdata:/usr/share/elasticsearch/data
+    networks:
+        - esnetwork
+        
+volumes:
+    esdata:
+        driver: local
+networks:
+    esnetwork:
+        driver: bridge

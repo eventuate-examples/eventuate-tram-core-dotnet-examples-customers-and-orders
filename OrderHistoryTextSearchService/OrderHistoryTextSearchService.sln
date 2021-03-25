@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderHistoryTextSearchService", "OrderHistoryTextSearchService.csproj", "{FA5FAF3C-88D6-48E8-93B2-02139F0E1103}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceCommon", "..\ServiceCommon\ServiceCommon.csproj", "{33CADF8D-6262-4F49-88F8-B031494F3C7C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6EA4FC1E-D039-43E8-AFB8-A906C398AD1E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FA5FAF3C-88D6-48E8-93B2-02139F0E1103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA5FAF3C-88D6-48E8-93B2-02139F0E1103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA5FAF3C-88D6-48E8-93B2-02139F0E1103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA5FAF3C-88D6-48E8-93B2-02139F0E1103}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33CADF8D-6262-4F49-88F8-B031494F3C7C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4D57D4B2-F4BB-46E1-BC3D-CB29122DB7AC}
+	EndGlobalSection
+EndGlobal

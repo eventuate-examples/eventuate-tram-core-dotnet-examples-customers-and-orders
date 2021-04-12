@@ -43,7 +43,7 @@ docker-compose up -d db
 docker-compose run --rm wait-for-db
 
 if [ -z "$USE_EXISTING_CONTAINERS" ] ; then
-  docker-compose run --rm dbsetup
+ docker-compose run --rm dbsetup
 fi
 
 docker-compose up -d zookeeper
@@ -68,13 +68,14 @@ docker-compose up -d db
 docker-compose run --rm wait-for-db
 
 if [ -z "$USE_EXISTING_CONTAINERS" ] ; then
-  docker-compose run --rm dbsetup
+ docker-compose run --rm dbsetup
 fi
 
 docker-compose up -d zookeeper
 docker-compose up -d kafka
 docker-compose up -d cdc-service
 docker-compose up -d mongo
+docker-compose up -d elasticsearch
 
 # Wait for docker containers to start up
 ./wait-for-services.sh
@@ -83,11 +84,11 @@ docker-compose up -d mongo
 docker-compose up -d customer-service
 docker-compose up -d order-service
 docker-compose up -d order-history-service
+docker-compose up -d order-history-text-search-service
 
 #Run Tests
 dotnet build EndToEndTests/EndToEndTests.csproj
 dotnet test EndToEndTests/EndToEndTests.csproj
-
 # Tear down test environment
 
 if [ -z "$KEEP_RUNNING" ] ; then

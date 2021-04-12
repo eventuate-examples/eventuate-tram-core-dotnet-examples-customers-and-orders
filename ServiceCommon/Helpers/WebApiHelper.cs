@@ -1,5 +1,6 @@
 ﻿using ServiceCommon.Custom;
 using ServiceCommon.OrderHistoryCommon;
+using ServiceCommon.OrderHistoryTextSearchCommon;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -56,6 +57,23 @@ namespace ServiceCommon.Helpers
                 throw new InvalidOperationException("Invalid HTTP Method");
             }
             return result;
+        }
+
+        public static List<T> WebApiTextSearch<T>(string httpMethod, string uri)
+        {
+            // Do the http api call
+            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(uri);
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = httpMethod;
+            Task<WebResponse> response = httpWebRequest.GetResponseAsync();
+            response.Wait();
+            HttpWebResponse httpResponse = (HttpWebResponse)response.Result;
+            using (StreamReader streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                string resultString = streamReader.ReadToEnd();
+                return JsonSerializer.Deserialize<List<T>>(resultString, SerializerOptions());
+            }
+
         }
         private static JsonSerializerOptions SerializerOptions()
         {

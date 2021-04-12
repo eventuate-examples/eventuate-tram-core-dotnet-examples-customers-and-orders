@@ -12,6 +12,8 @@ using System.Threading;
 using ServiceCommon.Helpers;
 using System;
 using ServiceCommon.OrderHistoryCommon;
+using ServiceCommon.OrderHistoryTextSearchCommon;
+using System.Collections.Generic;
 
 namespace EndToEndTests
 {
@@ -21,6 +23,7 @@ namespace EndToEndTests
         string urlCustomer = "http://localhost:8081/customer";
         string urlOrder = "http://localhost:8082/order";
         string urlOrderHistory = "http://localhost:8083/customers";
+        string urlOrderHistoryTextSearch = "http://localhost:8084";
         public CustomersAndOrdersEndToEndTest()
         {
         }
@@ -74,6 +77,41 @@ namespace EndToEndTests
                 Assert.AreEqual(orders[order1Id].State, OrderState.APPROVED);
                 Assert.AreEqual(orders[order2Id].State, OrderState.REJECTED);
             });
+        }
+        [TestMethod]
+        public void CustomerShouldReturnInSearch()
+        {
+            long customerId = CreateCustomer("John", "500");
+            Util.Eventually(50, 3000, () =>
+            {
+                List<CustomerTextView> customerTextView = GetCustomerTextView("John");
+                Assert.IsTrue(customerTextView.Count > 0);
+                //Assert.AreEqual(customerId.ToString(), customerTextView[0].id);
+            });
+        }
+        [TestMethod]
+        public void OrderShouldReturnInSearch()
+        {
+            long customerId = CreateCustomer("Bob", "200");
+            var orderId = CreateOrder(customerId, "15.56");
+            Util.Eventually(50, 3000, () =>
+            {
+                List<OrderTextView> orderTextView = GetOrderTextView("15.56");
+                Assert.IsTrue(orderTextView.Count > 0);
+                //Assert.AreEqual(orderId.ToString(), orderTextView[0].id);
+            });
+        }
+        private List<CustomerTextView> GetCustomerTextView(string customerId)
+        {
+            var customerTextView = WebApiHelper.WebApiTextSearch<CustomerTextView>("GET", urlOrderHistoryTextSearch + "/customers?search=" + customerId);
+            Assert.IsNotNull(customerTextView);
+            return customerTextView;
+        }
+        private List<OrderTextView> GetOrderTextView(string orderId)
+        {
+            var orderTextView = WebApiHelper.WebApiTextSearch<OrderTextView>("GET", urlOrderHistoryTextSearch + "/orders?search=" + orderId);
+            Assert.IsNotNull(orderTextView);
+            return orderTextView;
         }
 
         private CustomerView GetCustomerView(long customerId)

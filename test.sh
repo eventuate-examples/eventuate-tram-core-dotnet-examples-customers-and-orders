@@ -29,7 +29,7 @@ if dotnet nuget list source | grep -q 'https://nuget.pkg.github.com/eventuate-tr
   echo "Package already exists"
 else
   echo "Add package"
-  dotnet nuget add source https://nuget.pkg.github.com/eventuate-tram/index.json
+  ## dotnet nuget add source https://nuget.pkg.github.com/eventuate-tram/index.json
 fi
 
 docker-compose build

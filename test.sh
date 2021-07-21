@@ -25,11 +25,11 @@ while [ ! -z "$*" ] ; do
   shift
 done
 
-if dotnet nuget list source | grep -q 'https://api.bintray.com/nuget/eventuateio-oss/eventuateio-dotnet-snapshots'; then
+if dotnet nuget list source | grep -q 'https://nuget.pkg.github.com/eventuate-tram/index.json'; then
   echo "Package already exists"
 else
   echo "Add package"
-  dotnet nuget add source https://api.bintray.com/nuget/eventuateio-oss/eventuateio-dotnet-snapshots
+  dotnet nuget add source https://nuget.pkg.github.com/eventuate-tram/index.json
 fi
 
 docker-compose build

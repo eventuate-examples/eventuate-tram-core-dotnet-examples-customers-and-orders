@@ -21,7 +21,14 @@ jobs:
         dotnet-version: 3.1.201
 
     - name: InitNuget
-      run: dotnet nuget  add source https://api.bintray.com/nuget/eventuateio-oss/eventuateio-dotnet-snapshots
+      env:
+        SNAPSHOT_NUGET_PUBLISH_URL: github
+        SNAPSHOT_NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        dotnet nuget add source --username eventuateio \
+          --password "$SNAPSHOT_NUGET_API_KEY" \
+          --store-password-in-clear-text \
+          --name github "https://nuget.pkg.github.com/eventuate-tram/index.json"
 
     - name: Build
       run: ./test.sh
